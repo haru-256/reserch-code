@@ -48,7 +48,9 @@ class Isingmodel(object):
         """
         Data = pd.DataFrame(np.random.randint(2, size=(
             self.n_samples, self.size * self.size)) * 2 - 1)  # -1(下),1(上) でランダムに初期化
-        self.X_ = Data
+        self.X_ = pd.DataFrame(
+            np.empty(shape=(self.n_samples, self.size * self.size + 1)),
+            columns=list(range(1, self.size * self.size + 1))+["temp"])
         for i, data in enumerate(Data.values):  # 行ごとにループ
             data = data.reshape(self.size, self.size)  # 1つのデータを画像のように縦横に変形
             for _ in range(self.n_iter):
@@ -58,7 +60,8 @@ class Isingmodel(object):
                     lattice.index))  # ランダムに並べ替え
                 for x, y in lattice.values:
                     data[x, y] = self.spin_direction(data, x, y)
-            self.X_.iloc[i, :] = data.reshape(1, -1)
+            self.X_.iloc[i, :-1] = data.reshape(1, -1)
+            self.X_.iloc[i, -1] = self.temp
 
         return self.X_
 
